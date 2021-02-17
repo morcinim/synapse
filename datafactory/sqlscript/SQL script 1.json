@@ -1,0 +1,16 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://inadaylake.dfs.core.windows.net/wwi/factsale-parquet/2012/Q1/InvoiceDateKey=2012-01-01/part-00007-2d3babe9-5131-4b02-bc6c-9ad747e31499.c000.snappy.parquet',\n        FORMAT='PARQUET'\n    ) AS [result]\n\nSELECT\n    COUNT(*)\nFROM\n    OPENROWSET(\n        BULK 'https://inadaylake.dfs.core.windows.net/wwi/factsale-parquet/2012/Q1/*/*',\n        FORMAT='PARQUET'\n    ) AS [result]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

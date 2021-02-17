@@ -1,0 +1,16 @@
+{
+	"name": "Exercise 5 - Register model",
+	"properties": {
+		"content": {
+			"query": "-- Use poly to load model into the model table\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'fQv2fKq#FN7r'\n\n-- Create a database scoped credential with Azure storage account key (not a Shared Access Signature) as the secret.\nCREATE DATABASE SCOPED CREDENTIAL StorageCredential\nWITH\nIDENTITY = 'SHARED ACCESS SIGNATURE'\n, SECRET = 'MXWyVB9TR8oWhOfp4n/KyoH7R+Ucyh3JKdb1NPlCY3NvSxKjM9ZtrWLZX07gB4x68Ow8+cQKV5zP9nMu0qOZaQ=='\n;\n\n-- Create an external data source with CREDENTIAL option.\nCREATE EXTERNAL DATA SOURCE ModelStorage\nWITH\n( LOCATION = 'wasbs://models@tdetlstore.blob.core.windows.net'\n, CREDENTIAL = StorageCredential\n, TYPE = HADOOP\n)\n;\nCREATE EXTERNAL FILE FORMAT csv\nWITH (\nFORMAT_TYPE = DELIMITEDTEXT,\nFORMAT_OPTIONS (\nFIELD_TERMINATOR = ',',\nSTRING_DELIMITER = '',\nDATE_FORMAT = '',\nUSE_TYPE_DEFAULT = False\n)\n);\n\n--DROP EXTERNAL TABLE [wwi_ml].[MLModelExt]\nCREATE EXTERNAL TABLE [wwi_ml].[MLModelExt]\n(\n[Model] [varbinary](max) NULL\n)\nWITH\n(\nLOCATION='/hex' ,\nDATA_SOURCE = ModelStorage ,\nFILE_FORMAT = csv ,\nREJECT_TYPE = VALUE ,\nREJECT_VALUE = 0\n)   \nGO\n\n-- Verify access by running query\nSELECT Model, 'A simple model.'\nFROM wwi_ml.MLModelExt\n\n\nCREATE TABLE [wwi_ml].[MLModel]\n(\n[Id] [int] IDENTITY(1,1) NOT NULL,\n[Model] [varbinary](max) NULL,\n[Description] [varchar](200) NULL\n)\nWITH\n(\nDISTRIBUTION = REPLICATE,\nheap\n)\nGO\n\nINSERT INTO [wwi_ml].[MLModel] SELECT Model, 'A linear regression model.' FROM [wwi_ml].[MLModelExt]\nSELECT Model, 'A simple model.' FROM [wwi_ml].[MLModel]\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "sqlpool01",
+				"databaseName": "sqlpool01"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

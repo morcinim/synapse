@@ -1,0 +1,16 @@
+{
+	"name": "Task4-Configure SQLPool01",
+	"properties": {
+		"content": {
+			"query": "1--run on master\nCREATE LOGIN [asa.sql.staging]\nWITH PASSWORD = 'RedW1ne!'\nGO\n\n--run on sqlpool01 database\nCREATE USER [asa.sql.staging]\n    FOR LOGIN [asa.sql.staging]\n    WITH DEFAULT_SCHEMA = dbo\nGO\n\n-- Add user to the required roles\n\nEXEC sp_addrolemember N'db_datareader', N'asa.sql.staging'\nGO\n\nEXEC sp_addrolemember N'db_datawriter', N'asa.sql.staging'\nGO\n\nEXEC sp_addrolemember N'db_ddladmin', N'asa.sql.staging'\nGO\n\n--Create user in DB\nCREATE USER [analyticsinaday] FROM EXTERNAL PROVIDER;\n\n--Granting permission to the identity\nGRANT CONTROL ON DATABASE::sqlpool01 TO [analyticsinaday];\n\nCREATE USER [alfortes@microsoft.com] FROM EXTERNAL PROVIDER;\n--Granting permission to the identity\nGRANT CONTROL ON DATABASE::sqlpool01 TO [alfortes@microsoft.com];",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "sqlpool01",
+				"databaseName": "sqlpool01"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

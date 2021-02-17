@@ -1,0 +1,122 @@
+{
+	"name": "Exercise 2 - Bonus Notebook with CSharp",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool01",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "1"
+			}
+		},
+		"metadata": {
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "csharp"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/4d52c9f0-6666-4ccf-ab7f-91f74862f739/resourceGroups/SYNAPSEANALYTICS/providers/Microsoft.Synapse/workspaces/analyticsinaday/bigDataPools/sparkpool01",
+				"name": "sparkpool01",
+				"type": "Spark",
+				"endpoint": "https://analyticsinaday.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool01",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"// Configure the connection to the data lake\n",
+					"var adlsPath = \"abfss://wwi@inadaylake.dfs.core.windows.net\";\n",
+					"\n",
+					"// Set to the unique ID (e.g., A03) you were assigned for this workshop.\n",
+					"var uniqueId = \"A03\";\n",
+					"\n",
+					"// Validate a uniqueId was entered\n",
+					"if (uniqueId ==  \"\") {\n",
+					"    throw new Exception(\"You must enter the unique identifier you were assigned for this workshop into the uniqueId variable before proceeding.\");\n",
+					"}"
+				],
+				"attachments": null,
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"// Validate a uniqueId was entered\n",
+					"if (uniqueId ==  \"\") {\n",
+					"    throw new Exception(\"You must enter the unique identifier you were assigned for this workshop into the uniqueId variable before proceeding.\");\n",
+					"}\n",
+					"\n",
+					"// Import the sales data from the data lake\n",
+					"var sales = spark.Read().Option(\"header\", \"true\").Option(\"inferSchema\", \"true\").Option(\"sep\", \"|\").Csv($\"{adlsPath}/factsale-csv/2012/Q4\");\n",
+					"sales.Show(5);\n",
+					"sales.PrintSchema();"
+				],
+				"attachments": null,
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"using System;\n",
+					"using System.Collections.Generic;\n",
+					"\n",
+					"// Set up a JDBC connection to Azure Synapse Analytics\n",
+					"var jdbcUsername = \"asa.sql.staging@analyticsinaday\";\n",
+					"var jdbcPassword = \"RedW1ne!\";\n",
+					"var jdbcConnectionString = $\"jdbc:sqlserver://analyticsinaday.sql.azuresynapse.net:1433;database=sqlpool01;\";\n",
+					"\n",
+					"// Set target table name\n",
+					"var tableName = $\"wwi_staging.Sale_CSharp_{uniqueId}\";\n",
+					"\n",
+					"if (tableName ==  \"wwi_staging.Sale_CSharp_\") {\n",
+					"    throw new Exception(\"You must set the uniqueId variable before proceeding to ensure your table name is unique.\");\n",
+					"}\n",
+					"\n",
+					"// Write the retrieved sales data into a staging table in Azure Synapse Analytics.\n",
+					"sales\n",
+					"    .Limit(1500)\n",
+					"    .Write()\n",
+					"    .Format(\"jdbc\")\n",
+					"    .Options(\n",
+					"        new Dictionary<string, string>\n",
+					"        {\n",
+					"            {\"url\", jdbcConnectionString},\n",
+					"            {\"dbtable\", tableName},\n",
+					"            {\"user\", jdbcUsername},\n",
+					"            {\"password\", jdbcPassword},\n",
+					"            {\"encrypt\", \"false\"},\n",
+					"            {\"trustServerCertificate\", \"true\"},\n",
+					"            {\"createTableColumnTypes\", \"Description VARCHAR(100), Package VARCHAR(50)\"} // Override the column types for string values. They are assigned nvarchar(max) by default, \n",
+					"            //and that is not compatible with columnstore index.\n",
+					"        }\n",
+					"    )\n",
+					"    .Mode(\"append\")\n",
+					"    .Save();"
+				],
+				"attachments": null,
+				"execution_count": 3
+			}
+		]
+	}
+}

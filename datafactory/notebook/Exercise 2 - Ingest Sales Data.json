@@ -1,0 +1,103 @@
+{
+	"name": "Exercise 2 - Ingest Sales Data",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool01",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "1"
+			}
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/4d52c9f0-6666-4ccf-ab7f-91f74862f739/resourceGroups/SYNAPSEANALYTICS/providers/Microsoft.Synapse/workspaces/analyticsinaday/bigDataPools/sparkpool01",
+				"name": "sparkpool01",
+				"type": "Spark",
+				"endpoint": "https://analyticsinaday.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool01",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"//https://docs.microsoft.com/en-us/azure/synapse-analytics/spark/synapse-spark-sql-pool-import-export\n",
+					"\n",
+					"// Set the path to read the WWI Sales files\n",
+					"import org.apache.spark.sql.SparkSession\n",
+					"\n",
+					"// Set the path to the ADLS Gen2 account\n",
+					"val adlsPath = \"abfss://wwi@inadaylake.dfs.core.windows.net\"\n",
+					"\n",
+					"// Set to the unique ID (e.g., A03) you were assigned for this workshop.\n",
+					"val uniqueId = \"A03\"\n",
+					"\n",
+					"// Validate a uniqueId was entered\n",
+					"if (uniqueId ==  \"\") {\n",
+					"    throw new Exception(\"You must enter the unique identifier you were assigned for this workshop into the uniqueId variable before proceeding.\")\n",
+					"}"
+				],
+				"attachments": null,
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"// Validate a uniqueId was entered\n",
+					"if (uniqueId ==  \"\") {\n",
+					"    throw new Exception(\"You must enter the unique identifier you were assigned for this workshop into the uniqueId variable before proceeding.\")\n",
+					"}\n",
+					"\n",
+					"// Read the sales into a dataframe\n",
+					"val sales = spark.read.format(\"csv\").option(\"header\", \"true\").option(\"inferSchema\", \"true\").option(\"sep\", \"|\").load(s\"$adlsPath/factsale-csv/2012/Q4\")\n",
+					"sales.show(5)\n",
+					"sales.printSchema()"
+				],
+				"attachments": null,
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"// Import libraries for the SQL Analytics connector\n",
+					"import com.microsoft.spark.sqlanalytics.utils.Constants\n",
+					"import org.apache.spark.sql.SqlAnalyticsConnector._\n",
+					"import org.apache.spark.sql.SaveMode\n",
+					"\n",
+					"// Set target table name\n",
+					"var tableName = s\"SQLPool01.wwi_staging.Sale_$uniqueId\"\n",
+					"\n",
+					"if (tableName ==  \"SQLPool01.wwi_staging.Sale_\") {\n",
+					"    throw new Exception(\"You must set the uniqueId variable before proceeding to ensure your table name is unique.\")\n",
+					"}\n",
+					"\n",
+					"// Write the retrieved sales data into a staging table in Azure Synapse Analytics.\n",
+					"sales.limit(10000).write.mode(SaveMode.Append).sqlanalytics(tableName, Constants.INTERNAL)"
+				],
+				"attachments": null,
+				"execution_count": null
+			}
+		]
+	}
+}

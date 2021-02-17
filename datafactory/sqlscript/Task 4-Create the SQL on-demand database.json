@@ -1,0 +1,16 @@
+{
+	"name": "Task 4-Create the SQL on-demand database",
+	"properties": {
+		"content": {
+			"query": "CREATE DATABASE SQLOnDemand01\nCREATE CREDENTIAL [https://inadaylake.dfs.core.windows.net]\nWITH IDENTITY='User Identity';",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "SQLOnDemand01",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}
