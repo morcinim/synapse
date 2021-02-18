@@ -2,6 +2,9 @@
 	"name": "Auto ML Experiment",
 	"properties": {
 		"description": "runs Auto ML Experiment",
+		"folder": {
+			"name": "ML-Nytaxi"
+		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
 		"bigDataPool": {
