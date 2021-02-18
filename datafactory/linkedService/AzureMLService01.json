@@ -1,0 +1,21 @@
+{
+	"name": "AzureMLService01",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"description": "td-aml-machine learning service",
+		"annotations": [],
+		"type": "AzureMLService",
+		"typeProperties": {
+			"subscriptionId": "4d52c9f0-6666-4ccf-ab7f-91f74862f739",
+			"resourceGroupName": "DATABRICKS",
+			"mlWorkspaceName": "td_aml",
+			"servicePrincipalId": "be046917-3a5a-4987-8318-a1bbb56fa2aa",
+			"tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkFOQUxZVElDU0lOQURBWV9kYWE4Mjg4Mi1iZDQ5LTQ4ZGUtYjU3OS00MDYyMzcwYTUzOGQiDQp9"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
