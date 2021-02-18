@@ -1,0 +1,17 @@
+{
+	"name": "ScoreTestData",
+	"properties": {
+		"description": "applies the model to score new taxi fare data in a table",
+		"content": {
+			"query": "CREATE PROCEDURE nyc_taxi_procedure\nAS\nBEGIN\n\nSELECT\n    CAST([fareAmount] AS [real]) AS [fareAmount],\n    CAST([paymentType] AS [bigint]) AS [paymentType],\n    CAST([passengerCount] AS [bigint]) AS [passengerCount],\n    CAST([tripDistance] AS [real]) AS [tripDistance],\n    [tripTimeSecs],\n    CAST([pickupTimeBin] AS [varchar]) AS [pickupTimeBin]\nINTO [dbo].[#nyc_taxi]\nFROM [dbo].[nyc_taxi];\n\nSELECT *\nFROM PREDICT (MODEL = (SELECT [model] FROM aml_models WHERE [ID] = 'nyc_taxi_tip_predict:1'),\n              DATA = [dbo].[#nyc_taxi],\n              RUNTIME = ONNX) WITH ([output_label] [bigint])\n\nEND\nGO\n\nEXEC nyc_taxi_procedure",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "nytaxi",
+				"databaseName": "nytaxi"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}
