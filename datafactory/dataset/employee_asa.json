@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "employees",
 				"folderPath": "staging/ir",
 				"fileSystem": "inadaylake"
 			},
