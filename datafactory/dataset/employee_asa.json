@@ -10,7 +10,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "@concat('employee_',utcnow())",
+				"fileName": {
+					"value": "@concat(string(concat('employee_',utcnow())),'.csv')",
+					"type": "Expression"
+				},
 				"folderPath": "ir",
 				"fileSystem": "staging"
 			},
