@@ -14,7 +14,10 @@
 					"value": "@concat(string(concat('employee_',utcnow())),'.csv')",
 					"type": "Expression"
 				},
-				"folderPath": "ir",
+				"folderPath": {
+					"value": "@concat(\nconcat('ir/', string(formatDateTime(utcnow(),'yyyy'))),\nconcat('/', string(formatDateTime(utcnow(),'MM')))\n)",
+					"type": "Expression"
+				},
 				"fileSystem": "staging"
 			},
 			"columnDelimiter": ",",
