@@ -82,7 +82,7 @@
 								"type": "DelimitedTextSink",
 								"storeSettings": {
 									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
+									"copyBehavior": "FlattenHierarchy"
 								},
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
@@ -91,7 +91,6 @@
 								}
 							},
 							"enableStaging": false,
-							"validateDataConsistency": true,
 							"translator": {
 								"type": "TabularTranslator",
 								"mappings": [
@@ -5307,7 +5306,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "analyticsinaday-WorkspaceDefaultStorage",
+					"referenceName": "asadatalake01",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
@@ -5315,9 +5314,12 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "employees",
-						"folderPath": "staging/ir",
-						"fileSystem": "inadaylake"
+						"fileName": {
+							"value": "@concat('employee_',utcnow())",
+							"type": "Expression"
+						},
+						"folderPath": "ir",
+						"fileSystem": "staging"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -5327,7 +5329,7 @@
 				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/analyticsinaday-WorkspaceDefaultStorage')]"
+				"[concat(variables('workspaceId'), '/linkedServices/asadatalake01')]"
 			]
 		},
 		{
