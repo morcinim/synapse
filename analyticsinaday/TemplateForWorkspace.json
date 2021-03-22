@@ -81,8 +81,7 @@
 							"sink": {
 								"type": "DelimitedTextSink",
 								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "FlattenHierarchy"
+									"type": "AzureBlobFSWriteSettings"
 								},
 								"formatSettings": {
 									"type": "DelimitedTextWriteSettings",
@@ -5315,7 +5314,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": {
-							"value": "@concat('employee_',utcnow())",
+							"value": "@concat(string(concat('employee_',utcnow())),'.csv')",
 							"type": "Expression"
 						},
 						"folderPath": "ir",
