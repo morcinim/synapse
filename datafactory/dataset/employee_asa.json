@@ -2,7 +2,7 @@
 	"name": "employee_asa",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "analyticsinaday-WorkspaceDefaultStorage",
+			"referenceName": "asadatalake01",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
@@ -10,9 +10,9 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "employees",
-				"folderPath": "staging/ir",
-				"fileSystem": "inadaylake"
+				"fileName": "@concat('employee_',utcnow())",
+				"folderPath": "ir",
+				"fileSystem": "staging"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

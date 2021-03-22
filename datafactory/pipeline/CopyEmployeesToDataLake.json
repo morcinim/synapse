@@ -26,7 +26,7 @@
 						"type": "DelimitedTextSink",
 						"storeSettings": {
 							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "PreserveHierarchy"
+							"copyBehavior": "FlattenHierarchy"
 						},
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
@@ -35,7 +35,6 @@
 						}
 					},
 					"enableStaging": false,
-					"validateDataConsistency": true,
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
