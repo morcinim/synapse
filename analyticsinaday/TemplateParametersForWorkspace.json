@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "analyticsinaday"
+		},
+		"ETLBlobStore_connectionString": {
+			"value": ""
+		},
+		"PowerBIClientSQL_connectionString": {
+			"value": ""
+		},
+		"PowerBIClientSQL_password": {
+			"value": ""
+		},
+		"analyticsinaday-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"asadatalake01_accountKey": {
+			"value": ""
+		},
+		"asastore01_connectionString": {
+			"value": ""
+		},
+		"sqlpool01_connectionString": {
+			"value": ""
+		},
+		"PowerBIClientSQL_properties_typeProperties_userName": {
+			"value": "morcinim"
+		},
+		"analyticsinaday-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://inadaylake.dfs.core.windows.net"
+		},
+		"asadatalake01_properties_typeProperties_url": {
+			"value": "https://inadaylake.dfs.core.windows.net"
+		}
+	}
+}
