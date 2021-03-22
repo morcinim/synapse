@@ -1,0 +1,26 @@
+{
+	"name": "Hourly",
+	"properties": {
+		"description": "hourly trigger",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "CopyEmployeesToDataLake",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 2,
+				"startTime": "2021-03-22T16:46:00Z",
+				"endTime": "2021-03-23T16:46:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
