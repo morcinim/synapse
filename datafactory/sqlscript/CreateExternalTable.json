@@ -1,0 +1,20 @@
+{
+	"name": "CreateExternalTable",
+	"properties": {
+		"folder": {
+			"name": "Serverless"
+		},
+		"content": {
+			"query": "-- https://docs.microsoft.com/en-us/learn/modules/create-metadata-objects-azure-synapse-serverless-sql-pools/4-create-external-data-sources\n-- see sample script at https://github.com/Azure-Samples/Synapse/blob/main/SQL/Samples/LdwSample/SampleDB.sql\n-- version 1\n\n-- define database scoped credential\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'fQv2fKq#FN7r'\nCREATE DATABASE SCOPED CREDENTIAL [inadaylake] WITH IDENTITY='User Identity' \n\n-- define datasource location - point to datalake container\nIF (EXISTS(SELECT * FROM sys.external_data_sources WHERE name = 'EmployeeDatasource')) BEGIN\n    DROP EXTERNAL DATA SOURCE EmployeeDatasource\nEND\nCREATE EXTERNAL DATA SOURCE EmployeeDatasource WITH ( \n    LOCATION = 'https://inadaylake.dfs.core.windows.net', \n    CREDENTIAL = inadaylake \n); \n\n-- define formats for files: .csv and .parquet\nCREATE EXTERNAL FILE FORMAT CsvWithHeaderFormat \nWITH (   \n    FORMAT_TYPE = DELIMITEDTEXT, \n    FORMAT_OPTIONS ( FIELD_TERMINATOR = ',', STRING_DELIMITER = '', FIRST_ROW = 2   ) \n); \nGO \nCREATE EXTERNAL FILE FORMAT ParquetFormat WITH (  FORMAT_TYPE = PARQUET ); \n\n-- read ad hoc \nSELECT TOP 10 * \nFROM \n    OPENROWSET( \n        BULK 'staging/ir/2021/*/*.csv', \n        DATA_SOURCE = 'EmployeeDatasource', \n        FORMAT = 'CSV',\n        PARSER_VERSION='2.0'\n    ) AS employees\n\n\n-- create external table on csv files\nIF (EXISTS(SELECT * FROM sys.external_tables WHERE name = 'Employees')) BEGIN\n    DROP EXTERNAL TABLE Employees\nEND\nCREATE EXTERNAL TABLE Employees ( \n    ID INT,\n    FirstName VARCHAR(256) COLLATE Latin1_General_100_BIN2_UTF8,\n    LastName VARCHAR(256) COLLATE Latin1_General_100_BIN2_UTF8\n    ) \n    WITH ( \n        LOCATION = 'staging/ir/2021/*/*.csv', \n        DATA_SOURCE = EmployeeDatasource, \n        FILE_FORMAT = CsvWithHeaderFormat \n); \n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "Built-in",
+				"databaseName": "SQLOnDemand01"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
