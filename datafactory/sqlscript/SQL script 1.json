@@ -2,14 +2,15 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://inadaylake.dfs.core.windows.net/wwi/factsale-parquet/2012/Q1/InvoiceDateKey=2012-01-01/part-00007-2d3babe9-5131-4b02-bc6c-9ad747e31499.c000.snappy.parquet',\n        FORMAT='PARQUET'\n    ) AS [result]\n\nSELECT\n    COUNT(*)\nFROM\n    OPENROWSET(\n        BULK 'https://inadaylake.dfs.core.windows.net/wwi/factsale-parquet/2012/Q1/*/*',\n        FORMAT='PARQUET'\n    ) AS [result]\n",
+			"query": "CREATE USER [alfortes@microsoft.com] FROM EXTERNAL PROVIDER;\nEXEC sp_addrolemember 'db_datareader', 'alfortes@microsoft.com';\n\nCREATE ROLE Msft\nEXEC sp_addrolemember 'Msft', 'alfortes@microsoft.com';\n\n-- create View as owner on database table owned by this account\nCREATE VIEW wwi.Cities AS  SELECT *  FROM wwi.DimCity\n-- grant select on this view to the role\nGRANT SELECT ON wwi.Cities TO [Msft]\n\nEXECUTE AS USER = 'alfortes@microsoft.com'; \n\nSELECT * FROM wwi.Cities\n\n-- Execute the following as a database owner  \nGRANT SELECT ON wwi.DimCity TO db_datareader WITH GRANT OPTION; \n\nREVOKE CONTROL ON DATABASE::sqlpool01 TO [alfortes@microsoft.com];\n\nDROP VIEW dbo.Cities\n--Delete the workspace MSI user in the database\nDROP USER [alfortes@microsoft.com];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"name": "master",
-				"type": "SqlOnDemand"
-			}
+				"poolName": "sqlpool01",
+				"databaseName": "sqlpool01"
+			},
+			"resultLimit": 5000
 		},
 		"type": "SqlQuery"
 	}
