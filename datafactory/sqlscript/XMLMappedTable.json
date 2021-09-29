@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "script to create the XML mapped table for Stream Analytics data streaming",
 		"content": {
-			"query": "REATE TABLE [dbo].[XmlMappedTable]\n(   [Id]            int          NOT NULL\n,   [firstName]          int          NOT NULL\n,   [lastName]           int          NOT NULL\n\n)\nWITH\n(   CLUSTERED COLUMNSTORE INDEX\n,  DISTRIBUTION = HASH([ProductKey])\n)\n;",
+			"query": "CREATE TABLE [dbo].[XmlMappedTable]\n(   [id]            nvarchar(16)          NOT NULL\n,   [firstName]          nvarchar(80)         NOT NULL\n,   [lastName]           nvarchar(80)         NOT NULL\n\n)\nWITH\n(   CLUSTERED COLUMNSTORE INDEX\n,  DISTRIBUTION = HASH([id])\n)\n;",
 			"metadata": {
 				"language": "sql"
 			},
