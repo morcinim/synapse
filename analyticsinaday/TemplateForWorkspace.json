@@ -154,6 +154,10 @@
 					}
 				],
 				"concurrency": 1,
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"folder": {
 					"name": "IR1"
 				},
@@ -395,6 +399,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-03T22:11:21Z"
 			},
@@ -642,6 +650,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-06T15:18:30Z"
 			},
@@ -921,6 +933,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-03T22:13:05Z"
 			},
@@ -3098,6 +3114,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-03T22:11:37Z"
 			},
@@ -4185,6 +4205,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-03T22:18:32Z"
 			},
@@ -5252,6 +5276,10 @@
 						]
 					}
 				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
 				"annotations": [],
 				"lastPublishTime": "2020-11-03T22:20:06Z"
 			},
@@ -8720,7 +8748,7 @@
 							"name": "SelectDesiredColumns"
 						}
 					],
-					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> EnrichedCustomerDataAdls"
+					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
 				}
 			},
 			"dependsOn": [
@@ -8780,7 +8808,7 @@
 							"name": "SelectDesiredColumns"
 						}
 					],
-					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> EnrichedCustomerDataAdls"
+					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
 				}
 			},
 			"dependsOn": [
@@ -8814,8 +8842,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "Built-in",
-						"databaseName": "SQLOnDemand01"
+						"databaseName": "SQLOnDemand01",
+						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
 				},
@@ -8910,8 +8938,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "sqlpool01",
-						"databaseName": "sqlpool01"
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
 					}
 				},
 				"type": "SqlQuery"
@@ -8929,8 +8957,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "sqlpool01",
-						"databaseName": "sqlpool01"
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
 					}
 				},
 				"type": "SqlQuery"
@@ -8948,8 +8976,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "sqlpool01",
-						"databaseName": "sqlpool01"
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
 					}
 				},
 				"type": "SqlQuery"
@@ -8986,8 +9014,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "sqlpool01",
-						"databaseName": "sqlpool01"
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
 					},
 					"resultLimit": 5000
 				},
@@ -9044,8 +9072,8 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "sqlpool01",
-						"databaseName": "sqlpool01"
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
 					}
 				},
 				"type": "SqlQuery"
@@ -9064,9 +9092,30 @@
 						"language": "sql"
 					},
 					"currentConnection": {
-						"poolName": "Built-in",
-						"databaseName": "SQLOnDemand01"
+						"databaseName": "SQLOnDemand01",
+						"poolName": "Built-in"
 					}
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/XMLMappedTable')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "script to create the XML mapped table for Stream Analytics data streaming",
+				"content": {
+					"query": "REATE TABLE [dbo].[XmlMappedTable]\n(   [Id]            int          NOT NULL\n,   [firstName]          int          NOT NULL\n,   [lastName]           int          NOT NULL\n\n)\nWITH\n(   CLUSTERED COLUMNSTORE INDEX\n,  DISTRIBUTION = HASH([ProductKey])\n)\n;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqlpool01",
+						"poolName": "sqlpool01"
+					},
+					"resultLimit": 5000
 				},
 				"type": "SqlQuery"
 			},
@@ -9935,19 +9984,6 @@
 				]
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/nytaxi')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
-				"restorePointInTime": "0001-01-01T00:00:00",
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "westeurope"
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/sqlpool01')]",
