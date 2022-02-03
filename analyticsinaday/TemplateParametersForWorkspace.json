@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "analyticsinaday"
 		},
+		"BlobStorage_tdanalytics_connectionString": {
+			"value": ""
+		},
 		"ETLBlobStore_connectionString": {
 			"value": ""
 		},
