@@ -14,11 +14,15 @@
 			"executorCores": 4,
 			"numExecutors": 2,
 			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
-				"spark.dynamicAllocation.maxExecutors": "2"
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "36c40c81-9197-46f2-b900-481d7ce559c2"
 			}
 		},
 		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
 			"kernelspec": {
 				"name": "synapse_pyspark",
 				"display_name": "Synapse PySpark"
@@ -36,10 +40,12 @@
 					"authResource": "https://dev.azuresynapse.net"
 				},
 				"sparkVersion": "2.4",
-				"nodeCount": 10,
+				"nodeCount": 3,
 				"cores": 4,
-				"memory": 28
-			}
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
 			{
@@ -79,8 +85,7 @@
 					"    .withColumnRenamed('Total Chiller Items', 'TotalChillerItems') \\\n",
 					"    .withColumnRenamed('Lineage Key', 'LineageKey')"
 				],
-				"attachments": null,
-				"execution_count": 2
+				"execution_count": 1
 			},
 			{
 				"cell_type": "code",
@@ -89,16 +94,14 @@
 					"from datetime import datetime\n",
 					"from dateutil.relativedelta import relativedelta"
 				],
-				"attachments": null,
-				"execution_count": 3
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
 				"source": [
 					"### Export WWI sales data to parquet files\n",
 					""
-				],
-				"attachments": null
+				]
 			},
 			{
 				"cell_type": "code",
@@ -124,16 +127,14 @@
 					"\n",
 					"    start_date = end_date + relativedelta(days=1)"
 				],
-				"attachments": null,
-				"execution_count": 4
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
 				"source": [
 					"### Export WWI sales data to CSV files\n",
 					""
-				],
-				"attachments": null
+				]
 			},
 			{
 				"cell_type": "code",
@@ -161,8 +162,7 @@
 					"\n",
 					"    start_date = end_date + relativedelta(days=1)"
 				],
-				"attachments": null,
-				"execution_count": 5
+				"execution_count": 4
 			}
 		]
 	}

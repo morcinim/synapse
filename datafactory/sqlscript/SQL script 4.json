@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 4",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [SaleKey]\n,[CityKey]\n,[CustomerKey]\n,[BillToCustomerKey]\n,[StockItemKey]\n,[DeliveryDateKey]\n,[TotalChillerItems]\n,[LineageKey]\n,[TaxRate]\n,[TotalExcludingTax]\n,[TaxAmount]\n,[Profit]\n,[TotalIncludingTax]\n,[TotalDryItems]\n,[SalespersonKey]\n,[WWIInvoiceID]\n,[Description]\n,[Package]\n,[Quantity]\n,[UnitPrice]\n FROM [dbo].[SmallSalesP]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "SQLOnDemand01",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
