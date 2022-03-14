@@ -2,13 +2,13 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "CREATE USER [alfortes@microsoft.com] FROM EXTERNAL PROVIDER;\n\n--create role and add user to role\nCREATE ROLE Msft\n\n-- create View as owner on database table owned by this account\nCREATE VIEW wwi.Cities AS  SELECT * FROM wwi.DimCity\n\n-- grant select on this view to the role\nGRANT SELECT ON wwi.Cities TO [Msft]\n\n--a\nEXEC sp_addrolemember 'Msft', 'alfortes@microsoft.com';\n\n--test user - run entire 3 lines in a signle batch\nEXECUTE AS USER = 'alfortes@microsoft.com'; \nSELECT top(3) * FROM wwi.Cities\nGO\n\n-- remove user from role and run above batch again. there should be access denied\nsp_droprolemember 'Msft', 'alfortes@microsoft.com';\n\n\n\nsp_droprolemember 'db_datareader', 'alfortes@microsoft.com';\n\n-- Execute the following as a database owner  \nGRANT SELECT ON wwi.DimCity TO db_datareader WITH GRANT OPTION; \n\nREVOKE CONTROL ON DATABASE::sqlpool01 TO [alfortes@microsoft.com];\n\nDROP VIEW dbo.Cities\n--Delete the workspace MSI user in the database\nDROP USER [alfortes@microsoft.com];",
+			"query": "CREATE USER [mytdpurview] FROM EXTERNAL PROVIDER;\nEXEC sp_addrolemember 'db_datareader', [mytdpurview]\nGO\nCREATE USER [alfortes@microsoft.com] FROM EXTERNAL PROVIDER;\n\n--create role and add user to role\nCREATE ROLE Msft\n\n-- create View as owner on database table owned by this account\nCREATE VIEW wwi.Cities AS  SELECT * FROM wwi.DimCity\n\n-- grant select on this view to the role\nGRANT SELECT ON wwi.Cities TO [Msft]\n\n--a\nEXEC sp_addrolemember 'Msft', 'alfortes@microsoft.com';\n\n--test user - run entire 3 lines in a signle batch\nEXECUTE AS USER = 'alfortes@microsoft.com'; \nSELECT top(3) * FROM wwi.Cities\nGO\n\n-- remove user from role and run above batch again. there should be access denied\nsp_droprolemember 'Msft', 'alfortes@microsoft.com';\n\n\n\nsp_droprolemember 'db_datareader', 'alfortes@microsoft.com';\n\n-- Execute the following as a database owner  \nGRANT SELECT ON wwi.DimCity TO db_datareader WITH GRANT OPTION; \n\nREVOKE CONTROL ON DATABASE::sqlpool01 TO [alfortes@microsoft.com];\n\nDROP VIEW dbo.Cities\n--Delete the workspace MSI user in the database\nDROP USER [alfortes@microsoft.com];",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"poolName": "sqlpool01",
-				"databaseName": "sqlpool01"
+				"databaseName": "sqlpool01",
+				"poolName": "sqlpool01"
 			},
 			"resultLimit": 5000
 		},
