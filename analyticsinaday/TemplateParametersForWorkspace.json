@@ -29,6 +29,9 @@
 		"sqlpool01_connectionString": {
 			"value": ""
 		},
+		"synapselinkfordataverse_accountKey": {
+			"value": ""
+		},
 		"PowerBIClientSQL_properties_typeProperties_userName": {
 			"value": "morcinim"
 		},
@@ -37,6 +40,9 @@
 		},
 		"asadatalake01_properties_typeProperties_url": {
 			"value": "https://inadaylake.dfs.core.windows.net"
+		},
+		"synapselinkfordataverse_properties_typeProperties_url": {
+			"value": "https://tdsynapselinkdataverse.dfs.core.windows.net"
 		}
 	}
 }
