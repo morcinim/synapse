@@ -1,0 +1,97 @@
+{
+	"name": "SqlPoolTable1",
+	"properties": {
+		"annotations": [],
+		"type": "SqlPoolTable",
+		"schema": [
+			{
+				"name": "SaleKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CityKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CustomerKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BillToCustomerKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "StockItemKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DeliveryDateKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SalespersonKey",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WWIInvoiceID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Description",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Package",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Quantity",
+				"type": "nvarchar"
+			},
+			{
+				"name": "UnitPrice",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TaxRate",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TotalExcludingTax",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TaxAmount",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Profit",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TotalIncludingTax",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TotalDryItems",
+				"type": "nvarchar"
+			},
+			{
+				"name": "TotalChillerItems",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LineageKey",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "wii.FactInvoice"
+		},
+		"sqlPool": {
+			"referenceName": "sqlpool01",
+			"type": "SqlPoolReference"
+		}
+	}
+}
