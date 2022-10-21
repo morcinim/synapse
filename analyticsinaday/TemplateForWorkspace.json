@@ -184,7 +184,7 @@
 							},
 							"sink": {
 								"type": "SqlPoolSink",
-								"preCopyScript": "truncate table [dbo].[FactInvoice]",
+								"preCopyScript": "truncate table [dbo].[wii.FactInvoice]",
 								"allowPolyBase": true,
 								"polyBaseSettings": {
 									"rejectValue": 0,
