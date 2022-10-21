@@ -10,8 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "part-00012-cac8ec87-2785-4451-b969-c026e20da17f.c000.csv",
-				"folderPath": "factsale-csv/2012/Q1/InvoiceDateKey=2012-01-01",
+				"folderPath": "factsale-csv",
 				"fileSystem": "wwi"
 			},
 			"columnDelimiter": "|",
