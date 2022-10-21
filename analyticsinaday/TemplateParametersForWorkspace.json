@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "analyticsinaday"
 		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
 		"BlobStorage_tdanalytics_connectionString": {
 			"value": ""
 		},
@@ -31,6 +34,18 @@
 		},
 		"synapselinkfordataverse_accountKey": {
 			"value": ""
+		},
+		"AnomalyDetection_properties_typeProperties_subscriptionId": {
+			"value": "4d52c9f0-6666-4ccf-ab7f-91f74862f739"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://tdsynapsekeyvault.vault.azure.net/"
+		},
+		"AzureMLService1_properties_typeProperties_subscriptionId": {
+			"value": "4d52c9f0-6666-4ccf-ab7f-91f74862f739"
+		},
+		"AzureMLService1_properties_typeProperties_resourceGroupName": {
+			"value": "DATABRICKS"
 		},
 		"PowerBIClientSQL_properties_typeProperties_userName": {
 			"value": "morcinim"

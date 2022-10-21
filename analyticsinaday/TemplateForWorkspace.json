@@ -7,6 +7,10 @@
 			"metadata": "Workspace name",
 			"defaultValue": "analyticsinaday"
 		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
 		"BlobStorage_tdanalytics_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'BlobStorage_tdanalytics'"
@@ -42,6 +46,22 @@
 		"synapselinkfordataverse_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'synapselinkfordataverse'"
+		},
+		"AnomalyDetection_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "4d52c9f0-6666-4ccf-ab7f-91f74862f739"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://tdsynapsekeyvault.vault.azure.net/"
+		},
+		"AzureMLService1_properties_typeProperties_subscriptionId": {
+			"type": "string",
+			"defaultValue": "4d52c9f0-6666-4ccf-ab7f-91f74862f739"
+		},
+		"AzureMLService1_properties_typeProperties_resourceGroupName": {
+			"type": "string",
+			"defaultValue": "DATABRICKS"
 		},
 		"PowerBIClientSQL_properties_typeProperties_userName": {
 			"type": "string",
@@ -191,7 +211,14 @@
 						"name": "Enrich Customer Data",
 						"description": "Data flow that enriches the data from the DimCustomer table with location information from an external data source. The enriched data is then copied to a staging table in Azure Synapse Analytics.",
 						"type": "ExecuteDataFlow",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Import Customer dimension",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -228,9 +255,9 @@
 								}
 							},
 							"staging": {},
-							"compute": {
-								"coreCount": 48,
-								"computeType": "General"
+							"integrationRuntime": {
+								"referenceName": "MyIR1",
+								"type": "IntegrationRuntimeReference"
 							},
 							"traceLevel": "Fine"
 						}
@@ -420,6 +447,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/EnrichCustomerData')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/MyIR1')]",
 				"[concat(variables('workspaceId'), '/datasets/wwi_dimcustomer_adls')]",
 				"[concat(variables('workspaceId'), '/datasets/wwi_staging_dimcustomer_asa')]"
 			]
@@ -8484,6 +8512,94 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/AnomalyDetection')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Anomaly Detection Cognitive Service",
+				"annotations": [],
+				"type": "CognitiveService",
+				"typeProperties": {
+					"subscriptionId": "[parameters('AnomalyDetection_properties_typeProperties_subscriptionId')]",
+					"resourceGroup": "synapseanalytics",
+					"csName": "tdsynapseanomaly",
+					"csKind": "AnomalyDetector",
+					"csLocation": "westeurope",
+					"endPoint": "https://tdsynapseanomaly.cognitiveservices.azure.com/",
+					"csKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault1",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "anomalydetector"
+					}
+				},
+				"connectVia": {
+					"referenceName": "MyIR1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/MyIR1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureKeyVault1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureMLService1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureMLService",
+				"typeProperties": {
+					"subscriptionId": "[parameters('AzureMLService1_properties_typeProperties_subscriptionId')]",
+					"resourceGroupName": "[parameters('AzureMLService1_properties_typeProperties_resourceGroupName')]",
+					"mlWorkspaceName": "td_aml",
+					"authentication": "MSI"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/BlobStorage_tdanalytics')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -8754,7 +8870,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/MyIR1')]",
+			"name": "[concat(parameters('workspaceName'), '/IntegrationRuntime2')]",
 			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -8765,6 +8881,26 @@
 						"dataFlowProperties": {
 							"computeType": "General",
 							"coreCount": 16,
+							"timeToLive": 5,
+							"cleanup": false
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MyIR1')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
 							"timeToLive": 5,
 							"cleanup": false
 						}
@@ -8823,7 +8959,7 @@
 							"name": "SelectDesiredColumns"
 						}
 					],
-					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
+					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tmatchType:'exact',\n\tignoreSpaces: false,\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
 				}
 			},
 			"dependsOn": [
@@ -8883,7 +9019,7 @@
 							"name": "SelectDesiredColumns"
 						}
 					],
-					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
+					"script": "parameters{\n\tUniqueId as string\n}\nsource(output(\n\t\tCity as string,\n\t\tState as string,\n\t\tZip as string,\n\t\tLatitude as double,\n\t\tLongitude as double,\n\t\tTimezone as short,\n\t\tDST as boolean\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> PostalCodes\nsource(output(\n\t\tCustomerKey as integer,\n\t\tWWICustomerID as integer,\n\t\tCustomer as string,\n\t\tBillToCustomer as string,\n\t\tCategory as string,\n\t\tBuyingGroup as string,\n\t\tPrimaryContact as string,\n\t\tPostalCode as string,\n\t\tValidFrom as timestamp,\n\t\tValidTo as timestamp,\n\t\tLineageKey as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> DimCustomer\nPostalCodes filter(and(\n    greaterOrEqual(toInteger(Zip), 90000),\n    lesserOrEqual(toInteger(Zip), 98000)\n)) ~> PostalCodeFilter\nDimCustomer, PostalCodeFilter join(PostalCode == Zip,\n\tjoinType:'inner',\n\tmatchType:'exact',\n\tignoreSpaces: false,\n\tbroadcast: 'auto')~> JoinOnPostalCode\nJoinOnPostalCode select(mapColumn(\n\t\tCustomerKey,\n\t\tWWICustomerID,\n\t\tCustomer,\n\t\tBillToCustomer,\n\t\tCategory,\n\t\tBuyingGroup,\n\t\tPrimaryContact,\n\t\tPostalCode,\n\t\tValidFrom,\n\t\tValidTo,\n\t\tLineageKey,\n\t\tCity,\n\t\tState,\n\t\tLatitude,\n\t\tLongitude,\n\t\tTimezone,\n\t\tDST\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectDesiredColumns\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tstaged: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerData\nSelectDesiredColumns sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat('enrichedcustomer_', $UniqueId, '.parquet'))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> EnrichedCustomerDataAdls"
 				}
 			},
 			"dependsOn": [
@@ -10090,9 +10226,9 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
-							"Description": "Sample retail database",
 							"Name": "RetailDB",
 							"EntityType": "DATABASE",
+							"Description": "Sample retail database",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -10117,12 +10253,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Channel",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Channel",
 							"Description": "A channel is a means by which products or services are sold and/or distributed.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -10671,12 +10807,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Communication",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Communication",
 							"Description": "A communication to/from one or more party(s).",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -10960,12 +11096,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Customer",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Customer",
 							"Description": "A customer is an individual or legal entity that has or has purchased a product or service.\n\nA potential customer is an individual or legal entity that has the desire to acquire a product or service, the financial ability to pay for that product or service and is located in a location in which the product or service can be delivered to them.\n\nThe definition of 'customer' is of critical importance for every organization.    \n\nIt is the customer that is the focus of product planning, marketing, sales, service, reporting and analytics.    Without 'customer' there would be no need for the organization to exist since its purpose is to serve the customer and profit from that interaction.\n\nThe definition of 'customer' must be consistent with how customers exist and interact with the organization in the real world.  An artificial or conceptual definition of 'customer' that is not consistent with these two objectives is doomed to fail because the data will not be consistent with the definition and employees will not accept concepts or terms that are not consistent with what they see, know and how they interact with customers on a working basis.\n\nMicrosoft defines 'customer' to meet these objectives.    When we look out into the real world we see two dominant types of customers:  human beings and legal entities.     \n\nHuman beings are obviously male and female individuals of various ages, sex, demographics and a variety of similar dimensions that describe and define them who purchase products, good and services.    \n\nLegal entities are those legally-defined entities such as corporations, partnerships, non-profit organizations, government organizations etc. that purchase products, goods and services.\n\nThis view of 'customer' is consistent with the real world and consistent with how employees view and interact with customers.\n\nOf course, that is just the start of identifying, defining and understanding each type of 'customer'.     There is a great deal of detail, complexity and related data that can be used to define each type of customer to various levels of detail and different dimensions of information.\n\nMicrosoft implements these detailed concepts and related data via two distinct business area models that expand the coverage and complexity of each type of customer:\n\n-  INDIVIDUAL CUSTOMER Business Area Model\n-  LEGAL ENTITY CUSTOMER Business Area Model\n\nNote:\nEach of the Microsoft models - enterprise, business area or data warehouse - have a representative level of detail for the appropriate type of customer, which is a 'subset' of the total data available in the associated INDIVIDUAL CUSTOMER or LEGAL ENTITY CUSTOMER business area models..   Reference either of those models to expand the coverage or level of detail in each respective data model.\n\nThe actual customer implemented in each model depends upon the dominant use of customer for that industry.     \n\nFor example, in the pharmaceutical industry the customer is a legal entity, which represents another corporation, company, government organization etc. that purchases the pharmaceutical product and then distributes that product to the end-customer, which is an individual in a retail environment or a government-distribution scheme.    \n\nFor this example, the pharmaceutical models will have the legal entity customer represented but not the individual 'end customer' since that is represented in the appropriate retail industry models, which are a different offering.     \n\nOf course, the entire set of data available for a legal entity customer is contained in the associated LEGAL ENTITY CUSTOMER Business Area Model.   Reference the LEGAL ENTITY CUSTOMER Business Area Model to incorporate additional data that may be of relevance.\n\nIn many industries both types of customers are represented since a legal entity or individual can purchase products, goods or services and enter into contracts.    For these industries, both types of customers are represented by some of the more significant or relevant data derived from the associated LEGAL ENTITY or INDIVIDUAL CUSTOMER business area models.   These models can be used to expand the scope or level of detail in any of the enterprise, business area or data warehouse models.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -11167,12 +11303,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Document",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Document",
 							"Description": "A specific physical (written or printed) paper or electronic file that contains information.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -11672,12 +11808,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Employee",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Employee",
 							"Description": "An individual who is hired to provide services to a company on a regular basis in exchange for compensation.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -12058,12 +12194,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Order",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Order",
 							"Description": "A document or commission by the customer to order products.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -13415,12 +13551,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "RetailProduct",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "RetailProduct",
 							"Description": "A product is anything that can be offered to a market that might satisfy a want or need by potential customers.    That product is the sum of all physical, psychological, symbolic, and service attributes associated with it.\n\nThere are two basic types of products:\n\n- Tangible (physical)\n- Intangible (non-physical) such as services\n\nA service is a non-material or intangible product - such as professional consultancy, maintenance service, repair service etc.\nEach product has its own benefits, application, brand name, and packaging that gives it its own identity and distinguishing characteristics.\n\nEvery business or organization has business rules that define precisely what a product is.    While we intuitively know what a product is, we must quantify that knowledge and associated business rules with consistent definitions that can be implemented within the organization in strategies and applications.\n\nA product typically goes through five stages of development:\n\n(1) Idea Stage - involving a thorough evaluation of the potential product\n\n(2) Concept Stage - determines customer acceptance by testing and presentation to consumers and distribution channel members.   Specific aspects regarding quality, dependability, reliability, warranty, packaging, service, pricing, terms of sale, sales and distribution channels, advertising and promotions are evaluated.\n\n(3) Product Development Stage - transforms the prototype product into an actual product for mass sale.   This stage requires close interaction between both marketing and manufacturing.\n\n(4) Test Marketing Stage - may or may not be used since it is an expensive and time-consuming process.  Test marketing involves evaluating various product options and alternatives.\n\n(5) Commercialization - It is very expensive to launch a new product so commercialization only applies to those specific products that are actually going to be sold to the market.\n\nProducts tend to be categorized as either:  Industrial goods and consumer goods\n\nIndustrial goods are used to produce other products .\n\nIndustrial goods may be further divided into:\n\n- Raw materials\n- Equipment\n- Pre-built materials \n- Supplies.\n\nConsumer goods are intended for consumption by the general public.\n\nConsumer goods may be further divided into:\n\n- Durable goods\n- Nondurable goods\n- Packaged goods\n\nA product may be a member of a product family or product line.\n\nA product family is a grouping of products or services that are related to each other by common function, functionality, design platform or similar characteristics.\n\nMembers of a product family frequently have many common parts and assemblies.\n\nProduct families are the highest level of grouping for forecasting, capacity planning or related functions.\n\nEx:\nThe Apple Macintosh family of products consists of the product lines:\n- Mac mini\n- MacBook Pro\n- Mac Pro\n\nA product line is a grouping of products that are closely related in usage, functionality or marketing characteristics.\n\nA Product Family typically is created to address one or five functions:\n\n1. To increase profits and not erode the sales of existing products\n\n2. To attract additional Markets or Market Segments\n\n3. To counter competitor's products\n\n4. To fill a gap in an existing Product Family.\n\n5. To promote sales of other products in the family line\n\nLine Depth refers to the number of products in the product line.\n\nLine consistency refers to how closely related the products are that make up the product line.\n\nLine vulnerability refers to the percentage of sales or profits that are derived from only a few products in the product line.\n\nProduct width refers to the number of different product lines sold by a company.\n\nProduct mix refers to the total number of products sold in all product lines.\n\nLine extension refers to the adding of a new product to a line.\n\n\"Trading up or brand leveraging\" refers to adding a product of better quality to a product line than the other products in that line.\n\n\"Trading down\" refers to adding a product of lesser quality to a product line than the other products in that line.\n\nIf a line of products is sold with the same brand name, this is referred to as family branding.\nStrategy and decisions regarding a product line are usually incorporated in a high-level marketing plan addressing product line strategy, sales, channels, distribution channels, pricing and related issues.\nA product-line manager is responsible for a product line and supervises several product managers who are responsible for individual products within the line.\nProduct-line managers typically have the following responsibilities:\n- Expansion and composition of a product line\n- Evaluate the effects of product mixes on the profitability of other items in the line\n- Planning and allocation of resources to individual products in the line\nA product is normally associated with a brand strategy - manufacturer, private or generic.\n\n1. Manufacturer-  or 'national' branding in which the brand is assigned by the manufacturer of the Product.\n\n2. Private - or 'dealer' branding in which the brand is assigned by the retailer or wholesaler of the Product.\n\n3. Generic - in which the Product is not marked with any identification.   Generic brands are a means for manufacturers to increase profits by saving on advertising, packaging or other costs associated with manufacturer or private branding.\n\nA brand is name, term, sign, symbol or design or a combination of these which identify the goods or services and differentiate them from those of competitors'\n\nA Trade mark is a brand or some part of the brand that is given legal protection because it is capable of exclusive appropriation and representation.\n\nManufacturers can use their own brands (known as Manufacturers' brands) or brands of their distributors (Distributors' brands).\n\nManufacturers/ distributors use brand names for a variety of reasons ranging from simple identification purposes to having legal protection for unique features of the products from imitations.\n\nBrands help consumers recognize certain quality parameters. In some cases, brands are just used to endow the product with unique story and character which itself can be a basis for product differentiation.\n\nIndividual brands have their own identity and the corporate or common name is not used to promote its equity.\n\nIndividual branding requires more expensive advertising and brand extensive brand creation investments.  By extension, each new brand does not benefit from the positive perceptions of earlier brands.\n\nBy contrast, family branding has several advantages.\n\nEach new product is quickly associated with the other products and brand in terms of quality and benefits.\n\nReduced or eliminated time for name identification and advertising for name recognition purposes.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -15088,12 +15224,12 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "Transaction",
+							"EntityType": "TABLE",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "Transaction",
 							"Description": "The lowest level of executable work or customer activity.\n\nA transaction consists of one or more discrete events.",
-							"EntityType": "TABLE",
 							"TableType": "EXTERNAL",
 							"Origin": {
 								"Type": "SPARK"
@@ -16392,11 +16528,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-czsffkuazz",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-czsffkuazz",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16408,6 +16544,7 @@
 									"ToColumnName": "SalesChannelId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Channel.cdm.json/Channel\",\"toEntity\":\"Transaction.cdm.json/Transaction\",\"joinPairs\":[{\"fromAttribute\":\"ChannelId\",\"toAttribute\":\"SalesChannelId\"}]}}"
 							}
@@ -16420,11 +16557,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-gtharsstio",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-gtharsstio",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16436,6 +16573,7 @@
 									"ToColumnName": "CustomerId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Customer.cdm.json/Customer\",\"toEntity\":\"Transaction.cdm.json/Transaction\",\"joinPairs\":[{\"fromAttribute\":\"CustomerId\",\"toAttribute\":\"CustomerId\"}]}}"
 							}
@@ -16448,11 +16586,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-homtkarlyn",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-homtkarlyn",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16464,6 +16602,7 @@
 									"ToColumnName": "DistributionChannelId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Channel.cdm.json/Channel\",\"toEntity\":\"Order.cdm.json/Order\",\"joinPairs\":[{\"fromAttribute\":\"ChannelId\",\"toAttribute\":\"DistributionChannelId\"}]}}"
 							}
@@ -16476,11 +16615,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-lahcwrmlrj",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-lahcwrmlrj",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16492,6 +16631,7 @@
 									"ToColumnName": "ApprovedByEmployeeId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Employee.cdm.json/Employee\",\"toEntity\":\"Transaction.cdm.json/Transaction\",\"joinPairs\":[{\"fromAttribute\":\"EmployeeId\",\"toAttribute\":\"ApprovedByEmployeeId\"}]}}"
 							}
@@ -16504,11 +16644,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-oalysjuada",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-oalysjuada",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16520,6 +16660,7 @@
 									"ToColumnName": "PurchasingChannelId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Channel.cdm.json/Channel\",\"toEntity\":\"Transaction.cdm.json/Transaction\",\"joinPairs\":[{\"fromAttribute\":\"ChannelId\",\"toAttribute\":\"PurchasingChannelId\"}]}}"
 							}
@@ -16532,11 +16673,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-uaamdilvnl",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-uaamdilvnl",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16548,6 +16689,7 @@
 									"ToColumnName": "DocumentId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Communication.cdm.json/Communication\",\"toEntity\":\"Document.cdm.json/Document\",\"joinPairs\":[{\"fromAttribute\":\"CommunicationId\",\"toAttribute\":\"DocumentId\"}]}}"
 							}
@@ -16560,11 +16702,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-umuhovxsgq",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-umuhovxsgq",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16576,6 +16718,7 @@
 									"ToColumnName": "CustomerId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Customer.cdm.json/Customer\",\"toEntity\":\"Order.cdm.json/Order\",\"joinPairs\":[{\"fromAttribute\":\"CustomerId\",\"toAttribute\":\"CustomerId\"}]}}"
 							}
@@ -16588,11 +16731,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-xyjaojtpca",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-xyjaojtpca",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16604,6 +16747,7 @@
 									"ToColumnName": "OrderId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Transaction.cdm.json/Transaction\",\"toEntity\":\"Order.cdm.json/Order\",\"joinPairs\":[{\"fromAttribute\":\"TransactionId\",\"toAttribute\":\"OrderId\"}]}}"
 							}
@@ -16616,11 +16760,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-zfiijbcqbe",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-zfiijbcqbe",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16632,6 +16776,7 @@
 									"ToColumnName": "DistributionChannelId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Channel.cdm.json/Channel\",\"toEntity\":\"Transaction.cdm.json/Transaction\",\"joinPairs\":[{\"fromAttribute\":\"ChannelId\",\"toAttribute\":\"DistributionChannelId\"}]}}"
 							}
@@ -16644,11 +16789,11 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "relationship-zpnugyndkn",
+							"EntityType": "RELATIONSHIP",
 							"Namespace": {
 								"DatabaseName": "RetailDB"
 							},
-							"Name": "relationship-zpnugyndkn",
-							"EntityType": "RELATIONSHIP",
 							"Origin": {
 								"Type": "SPARK"
 							},
@@ -16660,6 +16805,7 @@
 									"ToColumnName": "SalesChannelId"
 								}
 							],
+							"RelationshipType": 0,
 							"Properties": {
 								"DerivedModelRelationshipInfo": "{\"baseRelationship\":{\"fromEntity\":\"Channel.cdm.json/Channel\",\"toEntity\":\"Order.cdm.json/Order\",\"joinPairs\":[{\"fromAttribute\":\"ChannelId\",\"toAttribute\":\"SalesChannelId\"}]}}"
 							}
@@ -16708,6 +16854,142 @@
 			},
 			"dependsOn": [],
 			"location": "westeurope"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CSV2Parquet')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "convert file to parquet",
+				"activities": [
+					{
+						"name": "Csv2Parquet",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Sales",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SalesParquet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/Sales')]",
+				"[concat(variables('workspaceId'), '/datasets/SalesParquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Sales')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "asadatalake01",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "part-00012-cac8ec87-2785-4451-b969-c026e20da17f.c000.csv",
+						"folderPath": "factsale-csv/2012/Q1/InvoiceDateKey=2012-01-01",
+						"fileSystem": "wwi"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "SaleKey|CityKey|CustomerKey|BillToCustomerKey|StockItemKey|DeliveryDateKey|SalespersonKey|WWIInvoiceID|Description|Package|Quantity|UnitPrice|TaxRate|TotalExcludingTax|TaxAmount|Profit|TotalIncludingTax|TotalDryItems|TotalChillerItems|LineageKey",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/asadatalake01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SalesParquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "asadatalake01",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "conversion",
+						"fileSystem": "wwi"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/asadatalake01')]"
+			]
 		}
 	]
 }
