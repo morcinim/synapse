@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 5",
+	"properties": {
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.objects O JOIN sys.schemas S ON O.schema_id = S.schema_id WHERE O.NAME = '[wii.FactInvoice]' AND O.TYPE = 'U' AND S.NAME = '[dbo]')\nCREATE TABLE [dbo].[wii.FactInvoice]\n\t(\n\t [SaleKey] nvarchar(4000),\n\t [CityKey] nvarchar(4000),\n\t [CustomerKey] nvarchar(4000),\n\t [BillToCustomerKey] nvarchar(4000),\n\t [StockItemKey] nvarchar(4000),\n\t [DeliveryDateKey] nvarchar(4000),\n\t [SalespersonKey] nvarchar(4000),\n\t [WWIInvoiceID] nvarchar(4000),\n\t [Description] nvarchar(4000),\n\t [Package] nvarchar(4000),\n\t [Quantity] nvarchar(4000),\n\t [UnitPrice] nvarchar(4000),\n\t [TaxRate] nvarchar(4000),\n\t [TotalExcludingTax] nvarchar(4000),\n\t [TaxAmount] nvarchar(4000),\n\t [Profit] nvarchar(4000),\n\t [TotalIncludingTax] nvarchar(4000),\n\t [TotalDryItems] nvarchar(4000),\n\t [TotalChillerItems] nvarchar(4000),\n\t [LineageKey] nvarchar(4000)\n\t)\nWITH\n\t(\n\tDISTRIBUTION = ROUND_ROBIN,\n\t CLUSTERED COLUMNSTORE INDEX\n\t -- HEAP\n\t)\nGO\n\n--Uncomment the 4 lines below to create a stored procedure for data pipeline orchestration​\n--CREATE PROC bulk_load_[FactInvoice]\n--AS\n--BEGIN\nCOPY INTO [wii].[FactInvoice]\n(SaleKey 1, CityKey 2, CustomerKey 3, BillToCustomerKey 4, StockItemKey 5, DeliveryDateKey 6, SalespersonKey 7, WWIInvoiceID 8, Description 9, Package 10, Quantity 11, UnitPrice 12, TaxRate 13, TotalExcludingTax 14, TaxAmount 15, Profit 16, TotalIncludingTax 17, TotalDryItems 18, TotalChillerItems 19, LineageKey 20)\nFROM 'https://inadaylake.dfs.core.windows.net/wwi/conversion/2012/Q1/InvoiceDateKey=2012-01-01/part-00012-cac8ec87-2785-4451-b969-c026e20da17f.c000.parquet'\nWITH\n(\n\tFILE_TYPE = 'PARQUET'\n\t,MAXERRORS = 0\n)\n--END\nGO\n\nSELECT TOP 100 * FROM [wii].[FactInvoice]\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sqlpool01",
+				"poolName": "sqlpool01"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
