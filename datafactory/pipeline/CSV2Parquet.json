@@ -94,7 +94,7 @@
 					},
 					"sink": {
 						"type": "SqlPoolSink",
-						"preCopyScript": "truncate [dbo].[FactInvoice]",
+						"preCopyScript": "truncate table [dbo].[FactInvoice]",
 						"allowPolyBase": true,
 						"polyBaseSettings": {
 							"rejectValue": 0,
